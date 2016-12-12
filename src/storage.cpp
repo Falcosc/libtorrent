@@ -926,7 +926,7 @@ namespace libtorrent
 			// this file. We're just sanity-checking whether the files exist
 			// or not.
 			peer_request const pr = fs.map_file(file_index
-				, int(fs.file_size(file_index) + 1), 0);
+				, fs.file_size(file_index), 0);
 			i = std::max(next(i), pr.piece);
 		}
 		return true;

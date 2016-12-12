@@ -166,9 +166,11 @@ namespace libtorrent
 		{
 			int const num_files = file_priority.list_size();
 			ret.file_priorities.resize(num_files, 4);
-			for (int i = 0; i < num_files; ++i)
+			for (file_index_t i = ret.file_priorities.begin_index();
+				i < ret.file_priorities.end_index(); ++i)
 			{
-				ret.file_priorities[i] = std::uint8_t(file_priority.list_int_value_at(i, 1));
+				ret.file_priorities[i] = std::uint8_t(
+					file_priority.list_int_value_at(static_cast<int>(i), 1));
 				// this is suspicious, leave seed mode
 				if (ret.file_priorities[i] == 0)
 				{
@@ -250,14 +252,15 @@ namespace libtorrent
 			int const pieces_len = pieces.string_length();
 			ret.have_pieces.resize(pieces_len);
 			ret.verified_pieces.resize(pieces_len);
-			for (int i = 0; i < pieces_len; ++i)
+			for (piece_index_t i = ret.verified_pieces.begin_index();
+				i < ret.verified_pieces.end_index(); ++i)
 			{
 				// being in seed mode and missing a piece is not compatible.
 				// Leave seed mode if that happens
-				if (pieces_str[i] & 1) ret.have_pieces.set_bit(i);
+				if (pieces_str[static_cast<int>(i)] & 1) ret.have_pieces.set_bit(i);
 				else ret.have_pieces.clear_bit(i);
 
-				if (pieces_str[i] & 2) ret.verified_pieces.set_bit(i);
+				if (pieces_str[static_cast<int>(i)] & 2) ret.verified_pieces.set_bit(i);
 				else ret.verified_pieces.clear_bit(i);
 			}
 		}
@@ -266,9 +269,10 @@ namespace libtorrent
 		{
 			char const* prio_str = piece_priority.string_ptr();
 			ret.piece_priorities.resize(piece_priority.string_length());
-			for (int i = 0; i < piece_priority.string_length(); ++i)
+			for (piece_index_t i = ret.piece_priorities.begin_index();
+				i < ret.piece_priorities.end_index(); ++i)
 			{
-				ret.piece_priorities[i] = prio_str[i];
+				ret.piece_priorities[i] = prio_str[static_cast<int>(i)];
 			}
 		}
 
@@ -312,8 +316,8 @@ namespace libtorrent
 			{
 				bdecode_node e = unfinished_entry.list_at(i);
 				if (e.type() != bdecode_node::dict_t) continue;
-				int piece = int(e.dict_find_int_value("piece", -1));
-				if (piece < 0) continue;
+				piece_index_t const piece = piece_index_t(e.dict_find_int_value("piece", -1));
+				if (piece < piece_index_t(0)) continue;
 
 				bdecode_node bitmask = e.dict_find_string("bitmask");
 				if (bitmask || bitmask.string_length() == 0) continue;

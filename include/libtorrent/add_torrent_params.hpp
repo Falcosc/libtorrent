@@ -45,6 +45,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "libtorrent/socket.hpp" // for tcp::endpoint
 #include "libtorrent/bitfield.hpp"
 #include "libtorrent/error_code.hpp"
+#include "libtorrent/units.hpp"
+#include "libtorrent/aux_/vector.hpp"
 
 namespace libtorrent
 {
@@ -313,7 +315,7 @@ namespace libtorrent
 		// can be set to control the initial file priorities when adding a
 		// torrent. The semantics are the same as for
 		// ``torrent_handle::prioritize_files()``.
-		std::vector<std::uint8_t> file_priorities;
+		vector<std::uint8_t, file_index_t> file_priorities;
 
 		// torrent extension construction functions can be added to this vector
 		// to have them be added immediately when the torrent is constructed.
@@ -431,22 +433,22 @@ namespace libtorrent
 		// this is a map of partially downloaded piece. The key is the piece index
 		// and the value is a bitfield where each bit represents a 16 kiB block.
 		// A set bit means we have that block.
-		std::map<int, bitfield> unfinished_pieces;
+		std::map<piece_index_t, bitfield> unfinished_pieces;
 
 		// this is a bitfield indicating which pieces we already have of this
 		// torrent.
-		bitfield have_pieces;
+		typed_bitfield<piece_index_t> have_pieces;
 
 		// when in seed_mode, pieces with a set bit in this bitfield have been
 		// verified to be valid. Other pieces will be verified the first time a
 		// peer requests it.
-		bitfield verified_pieces;
+		typed_bitfield<piece_index_t> verified_pieces;
 
 		// this sets the priorities for each individual piece in the torrent. Each
 		// element in the vector represent the piece with the same index. If you
 		// set both file- and piece priorities, file priorities will take
 		// precedence.
-		std::vector<std::uint8_t> piece_priorities;
+		vector<std::uint8_t, piece_index_t> piece_priorities;
 
 		// if this is a merkle tree torrent, and you're seeding, this field must
 		// be set. It is all the hashes in the binary tree, with the root as the

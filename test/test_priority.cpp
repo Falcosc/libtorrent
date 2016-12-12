@@ -136,8 +136,8 @@ void test_transfer(settings_pack const& sett, bool test_deprecated = false)
 	std::tie(tor1, tor2, ignore) = setup_transfer(&ses1, &ses2, nullptr
 		, true, false, true, "_priority", 8 * 1024, &t, false, nullptr);
 
-	int num_pieces = tor2.torrent_file()->num_pieces();
-	std::vector<int> priorities(num_pieces, 1);
+	int const num_pieces = tor2.torrent_file()->num_pieces();
+	vector<int, piece_index_t> priorities(num_pieces, 1);
 	// set half of the pieces to priority 0
 	std::fill(priorities.begin(), priorities.begin() + (num_pieces / 2), 0);
 	tor2.prioritize_pieces(priorities);

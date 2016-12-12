@@ -119,14 +119,15 @@ TORRENT_TEST(resolve_links)
 		if (num_matches > e.expected_matches)
 		{
 			file_storage const& fs = ti1->files();
-			for (int i = 0; i < int(links.size()); ++i)
+			for (file_index_t i{0}; i != file_index_t(links.size()); ++i)
 			{
-				TORRENT_ASSERT(i < fs.num_files());
+				TORRENT_ASSERT(i < file_index_t{fs.num_files()});
 				std::printf("%*s --> %s : %d\n"
 					, int(fs.file_name(i).size())
 					, fs.file_name(i).data()
-					, links[i].ti ? aux::to_hex(links[i].ti->info_hash()).c_str()
-					: "", links[i].file_idx);
+					, links[static_cast<int>(i)].ti
+					? aux::to_hex(links[static_cast<int>(i)].ti->info_hash()).c_str()
+					: "", static_cast<int>(links[i].file_idx));
 			}
 		}
 

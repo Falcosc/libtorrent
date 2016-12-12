@@ -254,6 +254,27 @@ namespace libtorrent
 		std::unique_ptr<std::uint32_t[]> m_buf;
 	};
 
+	template <typename IndexType>
+	struct typed_bitfield : bitfield
+	{
+		using bitfield::bitfield;
+
+		bool operator[](IndexType const index) const
+		{ return this->bitfield::get_bit(static_cast<int>(index)); }
+
+		bool get_bit(IndexType const index) const
+		{ return this->bitfield::get_bit(static_cast<int>(index)); }
+
+		void clear_bit(IndexType const index)
+		{ this->bitfield::clear_bit(static_cast<int>(index)); }
+
+		void set_bit(IndexType const index)
+		{ this->bitfield::set_bit(static_cast<int>(index)); }
+
+		IndexType end_index() const { return IndexType(this->size()); }
+		IndexType begin_index() const { return IndexType(0); }
+	};
+
 }
 
 #endif // TORRENT_BITFIELD_HPP_INCLUDED

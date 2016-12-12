@@ -79,7 +79,7 @@ void on_check_resume_data(status_t const status, storage_error const& error, boo
 			break;
 		case status_t::fatal_disk_error:
 			std::cerr << time_now_string() << " disk error: " << error.ec.message()
-				<< " file: " << error.file << std::endl;
+				<< " file: " << error.file() << std::endl;
 			break;
 		case status_t::need_full_check:
 			std::cerr << time_now_string() << " need full check" << std::endl;
@@ -95,7 +95,8 @@ void on_check_resume_data(status_t const status, storage_error const& error, boo
 void print_error(char const* call, int ret, storage_error const& ec)
 {
 	std::printf("%s: %s() returned: %d error: \"%s\" in file: %d operation: %d\n"
-		, time_now_string(), call, ret, ec.ec.message().c_str(), ec.file, ec.operation);
+		, time_now_string(), call, ret, ec.ec.message().c_str()
+		, static_cast<int>(ec.file()), ec.operation);
 }
 
 void run_until(io_service& ios, bool const& done)
@@ -167,7 +168,8 @@ std::shared_ptr<default_storage> setup_torrent(file_storage& fs
 	if (se)
 	{
 		TEST_ERROR(se.ec.message().c_str());
-		std::printf("default_storage::initialize %s: %d\n", se.ec.message().c_str(), int(se.file));
+		std::printf("default_storage::initialize %s: %d\n"
+			, se.ec.message().c_str(), static_cast<int>(se.file()));
 	}
 
 	return s;
@@ -366,7 +368,8 @@ void test_remove(std::string const& test_path, bool unbuffered)
 	if (se)
 	{
 		TEST_ERROR(se.ec.message().c_str());
-		std::printf("default_storage::delete_files %s: %d\n", se.ec.message().c_str(), int(se.file));
+		std::printf("default_storage::delete_files %s: %d\n"
+			, se.ec.message().c_str(), static_cast<int>(se.file()));
 	}
 
 	TEST_CHECK(!exists(combine_path(test_path, "temp_storage")));
@@ -479,7 +482,7 @@ void test_check_files(std::string const& test_path
 
 	bool done = false;
 	add_torrent_params frd;
-	std::vector<std::string> links;
+	vector<std::string, file_index_t> links;
 	io.async_check_files(pm.get(), &frd, links
 		, std::bind(&on_check_resume_data, _1, _2, &done));
 	io.submit_jobs();
@@ -1095,16 +1098,16 @@ struct test_fileop : fileop
 {
 	explicit test_fileop(int stripe_size) : m_stripe_size(stripe_size) {}
 
-	int file_op(int const file_index, std::int64_t const file_offset
+	int file_op(file_index_t const file_index, std::int64_t const file_offset
 		, span<file::iovec_t const> bufs, storage_error& ec) override
 	{
 		size_t offset = size_t(file_offset);
-		if (file_index >= int(m_file_data.size()))
+		if (file_index >= m_file_data.end_index())
 		{
-			m_file_data.resize(file_index + 1);
+			m_file_data.resize(static_cast<int>(file_index) + 1);
 		}
 
-		const int write_size = (std::min)(m_stripe_size, bufs_size(bufs));
+		const int write_size = std::min(m_stripe_size, bufs_size(bufs));
 
 		std::vector<char>& file = m_file_data[file_index];
 
@@ -1126,7 +1129,7 @@ struct test_fileop : fileop
 	}
 
 	int m_stripe_size;
-	std::vector<std::vector<char>> m_file_data;
+	vector<std::vector<char>, file_index_t> m_file_data;
 };
 
 struct test_read_fileop : fileop
@@ -1134,10 +1137,10 @@ struct test_read_fileop : fileop
 	// EOF after size bytes read
 	explicit test_read_fileop(int size) : m_size(size), m_counter(0) {}
 
-	int file_op(int const file_index, std::int64_t const file_offset
+	int file_op(file_index_t const file_index, std::int64_t const file_offset
 		, span<file::iovec_t const> bufs, storage_error& ec) override
 	{
-		int local_size = (std::min)(m_size, bufs_size(bufs));
+		int local_size = std::min(m_size, bufs_size(bufs));
 		const int read = local_size;
 		while (local_size > 0)
 		{
@@ -1162,15 +1165,15 @@ struct test_read_fileop : fileop
 struct test_error_fileop : fileop
 {
 	// EOF after size bytes read
-	explicit test_error_fileop(int error_file)
+	explicit test_error_fileop(file_index_t error_file)
 		: m_error_file(error_file) {}
 
-	int file_op(int const file_index, std::int64_t const file_offset
+	int file_op(file_index_t const file_index, std::int64_t const file_offset
 		, span<file::iovec_t const> bufs, storage_error& ec) override
 	{
 		if (m_error_file == file_index)
 		{
-			ec.file = file_index;
+			ec.file(file_index);
 			ec.ec.assign(boost::system::errc::permission_denied
 				, boost::system::generic_category());
 			ec.operation = storage_error::read;
@@ -1179,7 +1182,7 @@ struct test_error_fileop : fileop
 		return bufs_size(bufs);
 	}
 
-	int m_error_file;
+	file_index_t m_error_file;
 };
 
 int count_bufs(file::iovec_t const* bufs, int bytes)
@@ -1284,7 +1287,7 @@ TORRENT_TEST(readwritev_read_short)
 	// read everything
 	int ret = readwritev(fs, iov, 0, 0, fop, ec);
 
-	TEST_EQUAL(ec.file, 3);
+	TEST_EQUAL(static_cast<int>(ec.file()), 3);
 
 	TEST_EQUAL(ret, 100);
 	buf.resize(100);
@@ -1294,7 +1297,7 @@ TORRENT_TEST(readwritev_read_short)
 TORRENT_TEST(readwritev_error)
 {
 	file_storage fs = make_fs();
-	test_error_fileop fop(2);
+	test_error_fileop fop(file_index_t(2));
 	storage_error ec;
 
 	std::vector<char> buf(size_t(fs.total_size()));
@@ -1305,7 +1308,7 @@ TORRENT_TEST(readwritev_error)
 	int ret = readwritev(fs, iov, 0, 0, fop, ec);
 
 	TEST_EQUAL(ret, -1);
-	TEST_EQUAL(ec.file, 2);
+	TEST_EQUAL(static_cast<int>(ec.file()), 2);
 	TEST_EQUAL(ec.operation, storage_error::read);
 	TEST_EQUAL(ec.ec, boost::system::errc::permission_denied);
 	std::printf("error: %s\n", ec.ec.message().c_str());

@@ -639,14 +639,14 @@ TORRENT_TEST(parse_torrents)
 		{
 			// make sure we disambiguated the files
 			TEST_EQUAL(ti->num_files(), 2);
-			TEST_CHECK(ti->files().file_path(0) == combine_path(combine_path("temp", "foo"), "bar.txt"));
-			TEST_CHECK(ti->files().file_path(1) == combine_path(combine_path("temp", "foo"), "bar.1.txt"));
+			TEST_CHECK(ti->files().file_path(file_index_t{0}) == combine_path(combine_path("temp", "foo"), "bar.txt"));
+			TEST_CHECK(ti->files().file_path(file_index_t{1}) == combine_path(combine_path("temp", "foo"), "bar.1.txt"));
 		}
 		else if (std::string(test_torrents[i].file) == "pad_file.torrent")
 		{
 			TEST_EQUAL(ti->num_files(), 2);
-			TEST_EQUAL(ti->files().file_flags(0) & file_storage::flag_pad_file, false);
-			TEST_EQUAL(ti->files().file_flags(1) & file_storage::flag_pad_file, true);
+			TEST_EQUAL(ti->files().file_flags(file_index_t{0}) & file_storage::flag_pad_file, false);
+			TEST_EQUAL(ti->files().file_flags(file_index_t{1}) & file_storage::flag_pad_file, true);
 		}
 		else if (std::string(test_torrents[i].file) == "creation_date.torrent")
 		{
@@ -710,17 +710,17 @@ TORRENT_TEST(parse_torrents)
 		else if (std::string(test_torrents[i].file) == "slash_path.torrent")
 		{
 			TEST_EQUAL(ti->num_files(), 1);
-			TEST_EQUAL(ti->files().file_path(0), "temp" SEPARATOR "bar");
+			TEST_EQUAL(ti->files().file_path(file_index_t{0}), "temp" SEPARATOR "bar");
 		}
 		else if (std::string(test_torrents[i].file) == "slash_path2.torrent")
 		{
 			TEST_EQUAL(ti->num_files(), 1);
-			TEST_EQUAL(ti->files().file_path(0), "temp" SEPARATOR "abc....def" SEPARATOR "bar");
+			TEST_EQUAL(ti->files().file_path(file_index_t{0}), "temp" SEPARATOR "abc....def" SEPARATOR "bar");
 		}
 		else if (std::string(test_torrents[i].file) == "slash_path3.torrent")
 		{
 			TEST_EQUAL(ti->num_files(), 1);
-			TEST_EQUAL(ti->files().file_path(0), "temp....abc");
+			TEST_EQUAL(ti->files().file_path(file_index_t{0}), "temp....abc");
 		}
 		else if (std::string(test_torrents[i].file) == "symlink_zero_size.torrent")
 		{
@@ -730,14 +730,14 @@ TORRENT_TEST(parse_torrents)
 		else if (std::string(test_torrents[i].file) == "pad_file_no_path.torrent")
 		{
 			TEST_EQUAL(ti->num_files(), 2);
-			TEST_EQUAL(ti->files().file_path(1), combine_path(".pad", "0"));
+			TEST_EQUAL(ti->files().file_path(file_index_t{1}), combine_path(".pad", "0"));
 		}
 
 		file_storage const& fs = ti->files();
-		for (int i = 0; i < fs.num_files(); ++i)
+		for (file_index_t i{0}; i != file_index_t(fs.num_files()); ++i)
 		{
-			int const first = ti->map_file(i, 0, 0).piece;
-			int const last = ti->map_file(i, (std::max)(fs.file_size(i)-1, std::int64_t(0)), 0).piece;
+			piece_index_t const first = ti->map_file(i, 0, 0).piece;
+			piece_index_t const last = ti->map_file(i, std::max(fs.file_size(i)-1, std::int64_t(0)), 0).piece;
 			int const flags = fs.file_flags(i);
 			sha1_hash const ih = fs.hash(i);
 			std::printf("  %11" PRId64 " %c%c%c%c [ %4d, %4d ] %7u %s %s %s%s\n"
@@ -746,7 +746,7 @@ TORRENT_TEST(parse_torrents)
 				, (flags & file_storage::flag_executable)?'x':'-'
 				, (flags & file_storage::flag_hidden)?'h':'-'
 				, (flags & file_storage::flag_symlink)?'l':'-'
-				, first, last
+				, static_cast<int>(first), static_cast<int>(last)
 				, std::uint32_t(fs.mtime(i))
 				, ih != sha1_hash(nullptr) ? aux::to_hex(ih).c_str() : ""
 				, fs.file_path(i).c_str()

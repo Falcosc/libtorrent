@@ -35,6 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "libtorrent/bitfield.hpp"
 #include "libtorrent/performance_counters.hpp"
 #include "libtorrent/random.hpp"
+#include "libtorrent/units.hpp"
 
 #include <memory>
 #include <functional>
@@ -51,11 +52,11 @@ using namespace std::placeholders;
 
 const int blocks_per_piece = 4;
 
-bitfield string2vec(char const* have_str)
+typed_bitfield<piece_index_t> string2vec(char const* have_str)
 {
 	const int num_pieces = int(strlen(have_str));
-	bitfield have(num_pieces, false);
-	for (int i = 0; i < num_pieces; ++i)
+	typed_bitfield<piece_index_t> have(num_pieces, false);
+	for (piece_index_t i(0); i < have.end_index(); ++i)
 		if (have_str[i] != ' ') have.set_bit(i);
 	return have;
 }
@@ -74,7 +75,7 @@ ipv4_peer tmp9(endp, false, 0);
 ipv4_peer peer_struct(endp, true, 0);
 ipv4_peer* tmp_peer = &tmp1;
 
-std::vector<int> const empty_vector;
+static std::vector<piece_index_t> const empty_vector;
 
 #if TORRENT_USE_ASSERTS
 namespace {
@@ -113,7 +114,7 @@ std::shared_ptr<piece_picker> setup_picker(
 	const int num_pieces = int(strlen(availability));
 	TORRENT_ASSERT(int(strlen(have_str)) == num_pieces);
 
-	std::shared_ptr<piece_picker> p(new piece_picker);
+	std::shared_ptr<piece_picker> p = std::make_shared<piece_picker>();
 	p->init(blocks_per_piece, blocks_per_piece, num_pieces);
 
 	for (int i = 0; i < num_pieces; ++i)
@@ -127,9 +128,9 @@ std::shared_ptr<piece_picker> setup_picker(
 		for (int j = 0; j < avail; ++j) p->inc_refcount(i, peers[j]);
 	}
 
-	bitfield have = string2vec(have_str);
+	auto have = string2vec(have_str);
 
-	for (int i = 0; i < num_pieces; ++i)
+	for (piece_index_t i(0); i < have.end_index(); ++i)
 	{
 		if (partial[i] == 0) break;
 
@@ -270,7 +271,7 @@ std::vector<piece_block> pick_pieces(std::shared_ptr<piece_picker> const& p
 	, int prefer_contiguous_blocks
 	, torrent_peer* peer_struct
 	, int options = piece_picker::rarest_first
-	, std::vector<int> const& suggested_pieces = empty_vector)
+	, std::vector<piece_index_t> const& suggested_pieces = empty_vector)
 {
 	std::vector<piece_block> picked;
 	counters pc;
@@ -285,7 +286,6 @@ std::vector<piece_block> pick_pieces(std::shared_ptr<piece_picker> const& p
 int test_pick(std::shared_ptr<piece_picker> const& p
 	, int options = piece_picker::rarest_first)
 {
-	const std::vector<int> empty_vector;
 	std::vector<piece_block> picked = pick_pieces(p, "*******", 1, 0, nullptr
 		, options, empty_vector);
 	if (picked.size() != 1) return -1;
@@ -1257,7 +1257,7 @@ TORRENT_TEST(inc_ref_dec_ref)
 	p->dec_refcount(5, &tmp0);
 	p->inc_refcount(5, &tmp0);
 
-	bitfield bits = string2vec("*      ");
+	typed_bitfield<piece_index_t> bits = string2vec("*      ");
 	TEST_EQUAL(bits.get_bit(0), true);
 	TEST_EQUAL(bits.get_bit(1), false);
 	TEST_EQUAL(bits.get_bit(2), false);
@@ -1404,7 +1404,7 @@ TORRENT_TEST(suggested_pieces)
 	// test suggested pieces
 	auto p = setup_picker("1111222233334444", "                ", "", "");
 	int v[] = {1, 5};
-	const std::vector<int> suggested_pieces(v, v + 2);
+	const std::vector<piece_index_t> suggested_pieces(v, v + 2);
 
 	auto picked = pick_pieces(p, "****************", 1, blocks_per_piece
 		, nullptr, options, suggested_pieces);
@@ -1858,7 +1858,7 @@ TORRENT_TEST(time_critical_mode)
 
 	// even when a non-critical piece is suggested should we ignore it
 	int v[] = {1, 5};
-	const std::vector<int> suggested_pieces(v, v + 2);
+	const std::vector<piece_index_t> suggested_pieces(v, v + 2);
 
 	picked = pick_pieces(p, "*******", 7 * blocks_per_piece, 0, tmp_peer
 		, piece_picker::rarest_first | piece_picker::time_critical_mode

@@ -1832,7 +1832,7 @@ cached_piece_entry* block_cache::find_piece(disk_io_job const* j)
 	return find_piece(j->storage.get(), j->piece);
 }
 
-cached_piece_entry* block_cache::find_piece(storage_interface* st, int piece)
+cached_piece_entry* block_cache::find_piece(storage_interface* st, piece_index_t piece)
 {
 	cached_piece_entry model;
 	model.storage = st->shared_from_this();

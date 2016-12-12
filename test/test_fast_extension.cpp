@@ -132,7 +132,8 @@ void print_message(char const* buffer, int len)
 			r.piece = detail::read_int32(ptr);
 			r.start = detail::read_int32(ptr);
 			r.length = detail::read_int32(ptr);
-			std::snprintf(extra, sizeof(extra), "p: %d s: %d l: %d", r.piece, r.start, r.length);
+			std::snprintf(extra, sizeof(extra), "p: %d s: %d l: %d"
+				, static_cast<int>(r.piece), r.start, r.length);
 		}
 		else if (msg == 0x11 && len == 5)
 		{
@@ -319,10 +320,10 @@ void send_request(tcp::socket& s, peer_request req)
 {
 	using namespace libtorrent::detail;
 
-	log("==> request %d (%d,%d)", req.piece, req.start, req.length);
+	log("==> request %d (%d,%d)", static_cast<int>(req.piece), req.start, req.length);
 	char msg[] = "\0\0\0\x0d\x06            "; // have_none
 	char* ptr = msg + 5;
-	write_uint32(req.piece, ptr);
+	write_uint32(static_cast<int>(req.piece), ptr);
 	write_uint32(req.start, ptr);
 	write_uint32(req.length, ptr);
 	error_code ec;

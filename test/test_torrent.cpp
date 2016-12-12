@@ -58,7 +58,7 @@ void test_running_torrent(std::shared_ptr<torrent_info> info, std::int64_t file_
 	pack.set_int(settings_pack::max_retry_port_bind, 10);
 	lt::session ses(pack);
 
-	std::vector<std::uint8_t> zeroes;
+	vector<std::uint8_t, file_index_t> zeroes;
 	zeroes.resize(1000, 0);
 	add_torrent_params p;
 	p.flags &= ~add_torrent_params::flag_paused;
@@ -78,7 +78,7 @@ void test_running_torrent(std::shared_ptr<torrent_info> info, std::int64_t file_
 		return;
 	}
 
-	std::vector<int> ones(info->num_files(), 1);
+	vector<int, file_index_t> ones(info->num_files(), 1);
 	h.prioritize_files(ones);
 
 //	std::this_thread::sleep_for(lt::milliseconds(500));
@@ -87,8 +87,8 @@ void test_running_torrent(std::shared_ptr<torrent_info> info, std::int64_t file_
 	TEST_EQUAL(st.total_wanted, file_size); // we want the single file
 	TEST_EQUAL(st.total_wanted_done, 0);
 
-	std::vector<int> prio(info->num_files(), 1);
-	prio[0] = 0;
+	vector<int, file_index_t> prio(info->num_files(), 1);
+	prio[file_index_t(0)] = 0;
 	h.prioritize_files(prio);
 	st = h.status();
 
@@ -106,7 +106,7 @@ void test_running_torrent(std::shared_ptr<torrent_info> info, std::int64_t file_
 
 	if (info->num_files() > 1)
 	{
-		prio[1] = 0;
+		prio[file_index_t(1)] = 0;
 		h.prioritize_files(prio);
 		st = h.status();
 

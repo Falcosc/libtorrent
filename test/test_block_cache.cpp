@@ -49,26 +49,26 @@ struct test_storage_impl : storage_interface
 	void initialize(storage_error& ec) override {}
 
 	int readv(span<file::iovec_t const> bufs
-		, int piece, int offset, int flags, storage_error& ec) override
+		, piece_index_t piece, int offset, int flags, storage_error& ec) override
 	{
 		return bufs_size(bufs);
 	}
 	int writev(span<file::iovec_t const> bufs
-		, int piece, int offset, int flags, storage_error& ec) override
+		, piece_index_t piece, int offset, int flags, storage_error& ec) override
 	{
 		return bufs_size(bufs);
 	}
 
 	bool has_any_file(storage_error& ec) override { return false; }
-	void set_file_priority(std::vector<std::uint8_t> const& prio
+	void set_file_priority(vector<std::uint8_t, file_index_t> const& prio
 		, storage_error& ec) override {}
 	status_t move_storage(std::string const& save_path, int flags
 		, storage_error& ec) override { return status_t::no_error; }
 	bool verify_resume_data(add_torrent_params const& rd
-		, std::vector<std::string> const& links
+		, vector<std::string, file_index_t> const& links
 		, storage_error& ec) override { return true; }
 	void release_files(storage_error& ec) override {}
-	void rename_file(int index, std::string const& new_filename
+	void rename_file(file_index_t index, std::string const& new_filename
 		, storage_error& ec) override {}
 	void delete_files(int, storage_error& ec) override {}
 };

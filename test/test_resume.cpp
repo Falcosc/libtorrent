@@ -171,7 +171,7 @@ torrent_handle test_resume_flags(lt::session& ses, int flags
 
 	if (file_priorities[0])
 	{
-		std::vector<std::uint8_t> priorities_vector;
+		vector<std::uint8_t, file_index_t> priorities_vector;
 		for (int i = 0; file_priorities[i]; ++i)
 			priorities_vector.push_back(file_priorities[i] - '0');
 

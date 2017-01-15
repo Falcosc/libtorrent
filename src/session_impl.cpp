@@ -3841,22 +3841,33 @@ retry:
 				if (!t->allows_peers())
 					t->log_to_all_peers("auto manager starting torrent");
 #endif
+				t->set_upload_mode(false);
 				t->set_allow_peers(true);
 				t->update_gauge();
 				t->update_want_peers();
 				continue;
 			}
 
+			// don't cut connection if we are between start DL and finish DL
+			if( !t->is_finished() && t->num_have() > 0)
+			{
+				t->set_upload_mode(true);
+				t->set_announce_to_dht(--dht_limit >= 0);
+				t->set_announce_to_trackers(--tracker_limit >= 0);
+				t->set_announce_to_lsd(--lsd_limit >= 0);
+			} else {
 #ifndef TORRENT_DISABLE_LOGGING
-			if (t->allows_peers())
-				t->log_to_all_peers("auto manager pausing torrent");
+				if (t->allows_peers())
+					t->log_to_all_peers("auto manager pausing torrent");
 #endif
-			// use graceful pause for auto-managed torrents
-			t->set_allow_peers(false, torrent::flag_graceful_pause
-				| torrent::flag_clear_disk_cache);
-			t->set_announce_to_dht(false);
-			t->set_announce_to_trackers(false);
-			t->set_announce_to_lsd(false);
+				// use graceful pause for auto-managed torrents
+				t->set_allow_peers(false, torrent::flag_graceful_pause
+					| torrent::flag_clear_disk_cache);
+				t->set_announce_to_dht(false);
+				t->set_announce_to_trackers(false);
+				t->set_announce_to_lsd(false);
+			}
+
 			t->update_gauge();
 			t->update_want_peers();
 		}

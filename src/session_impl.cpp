@@ -3812,7 +3812,10 @@ retry:
 
 			// inactive torrents don't count (and if you configured them to do so,
 			// the torrent won't say it's inactive)
-			if (hard_limit > 0 && t->is_inactive())
+			// only for seeds and for started downloads (is_upload_only false)
+			// otherwise it would start all inactive downloads
+			if ((t->is_finished() || !t->is_upload_only())
+				&& hard_limit > 0 && t->is_inactive())
 			{
 				t->set_announce_to_dht(--dht_limit >= 0);
 				t->set_announce_to_trackers(--tracker_limit >= 0);
@@ -3823,6 +3826,7 @@ retry:
 				if (!t->allows_peers())
 					t->log_to_all_peers("auto manager starting (inactive) torrent");
 #endif
+				t->set_upload_mode(false);
 				t->set_allow_peers(true);
 				t->update_gauge();
 				t->update_want_peers();

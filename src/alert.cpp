@@ -1192,8 +1192,17 @@ namespace libtorrent {
 
 	std::string torrent_error_alert::message() const
 	{
-		char msg[200];
-		snprintf(msg, sizeof(msg), " ERROR: %s", convert_from_native(error.message()).c_str());
+		char msg[400];
+		if (error)
+		{
+			std::snprintf(msg, sizeof(msg), " ERROR: (%d %s) %s"
+				, error.value(), convert_from_native(error.message()).c_str()
+				, filename());
+		}
+		else
+		{
+			std::snprintf(msg, sizeof(msg), " ERROR: %s", filename());
+		}
 		return torrent_alert::message() + msg;
 	}
 

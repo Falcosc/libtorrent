@@ -105,6 +105,7 @@ namespace libtorrent
 		t.need_picker();
 
 		piece_picker& p = t.picker();
+		c.lastpiece = p.num_pieces() - p.num_have() <= 1;
 		std::vector<piece_block> interesting_pieces;
 		interesting_pieces.reserve(100);
 
@@ -171,10 +172,13 @@ namespace libtorrent
 			t.alerts().emplace_alert<picker_log_alert>(t.get_handle(), c.remote()
 				, c.pid(), flags, &interesting_pieces[0], int(interesting_pieces.size()));
 		}
+#else
+		if(last_piece){
 		c.peer_log(peer_log_alert::info, "PIECE_PICKER"
 			, "prefer_contiguous: %d picked: %d"
 			, prefer_contiguous_blocks, int(interesting_pieces.size()));
-#else
+		}
+
 		TORRENT_UNUSED(flags);
 #endif
 
@@ -238,11 +242,11 @@ namespace libtorrent
 					= std::find_if(dq.begin(), dq.end(), has_block(*i));
 				if (j != dq.end()) TORRENT_ASSERT(j->timed_out || j->not_wanted);
 #endif
-#ifndef TORRENT_DISABLE_LOGGING
+
 				c.peer_log(peer_log_alert::info, "PIECE_PICKER"
 					, "not_picking: %d,%d already in queue"
 					, i->piece_index, i->block_index);
-#endif
+
 				continue;
 			}
 

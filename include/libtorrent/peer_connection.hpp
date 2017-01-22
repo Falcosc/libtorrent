@@ -291,6 +291,8 @@ namespace libtorrent
 		};
 
 		virtual int type() const = 0;
+		
+		bool lastpiece;
 
 		enum channels
 		{

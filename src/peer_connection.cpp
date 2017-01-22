@@ -114,7 +114,7 @@ namespace libtorrent
 		return t->is_single_thread();
 	}
 #endif
-
+	
 	// outbound connection
 	peer_connection::peer_connection(peer_connection_args const& pack)
 		: peer_connection_hot_members(pack.tor, *pack.ses, *pack.sett)
@@ -185,6 +185,7 @@ namespace libtorrent
 		, m_has_metadata(true)
 		, m_exceeded_limit(false)
 		, m_slow_start(true)
+		, lastpiece (false)
 #if TORRENT_USE_ASSERTS
 		, m_in_constructor(true)
 		, m_disconnect_started(false)
@@ -516,7 +517,7 @@ namespace libtorrent
 		, char const* event, char const* fmt, ...) const
 	{
 		TORRENT_ASSERT(is_single_thread());
-
+		if (!lastpiece) return;
 		if (!m_ses.alerts().should_post<peer_log_alert>()) return;
 
 		va_list v;
@@ -3441,22 +3442,23 @@ namespace libtorrent
 		TORRENT_ASSERT(std::find(m_request_queue.begin(), m_request_queue.end()
 			, block) == m_request_queue.end());
 
+		lastpiece = t->picker().num_pieces() - t->picker().num_have() <= 1;
 		if (t->upload_mode())
 		{
-#ifndef TORRENT_DISABLE_LOGGING
+		if(lastpiece){
 			peer_log(peer_log_alert::info, "PIECE_PICKER"
 				, "not_picking: %d,%d upload_mode"
 				, block.piece_index, block.block_index);
-#endif
+}
 			return false;
 		}
 		if (m_disconnecting)
 		{
-#ifndef TORRENT_DISABLE_LOGGING
+		if(lastpiece){
 			peer_log(peer_log_alert::info, "PIECE_PICKER"
 				, "not_picking: %d,%d disconnecting"
 				, block.piece_index, block.block_index);
-#endif
+}
 			return false;
 		}
 
@@ -3473,11 +3475,11 @@ namespace libtorrent
 			{
 				if (i->busy)
 				{
-#ifndef TORRENT_DISABLE_LOGGING
+		if(lastpiece){
 					peer_log(peer_log_alert::info, "PIECE_PICKER"
 						, "not_picking: %d,%d already in download queue & busy"
 						, block.piece_index, block.block_index);
-#endif
+}
 					return false;
 				}
 			}
@@ -3487,11 +3489,11 @@ namespace libtorrent
 			{
 				if (i->busy)
 				{
-#ifndef TORRENT_DISABLE_LOGGING
+		if(lastpiece){
 					peer_log(peer_log_alert::info, "PIECE_PICKER"
 						, "not_picking: %d,%d already in request queue & busy"
 						, block.piece_index, block.block_index);
-#endif
+}
 					return false;
 				}
 			}
@@ -3500,11 +3502,11 @@ namespace libtorrent
 		if (!t->picker().mark_as_downloading(block, peer_info_struct()
 			, picker_options()))
 		{
-#ifndef TORRENT_DISABLE_LOGGING
+		if(lastpiece){
 			peer_log(peer_log_alert::info, "PIECE_PICKER"
 				, "not_picking: %d,%d failed to mark_as_downloading"
 				, block.piece_index, block.block_index);
-#endif
+}
 			return false;
 		}
 
@@ -3540,9 +3542,9 @@ namespace libtorrent
 
 		TORRENT_ASSERT(t->valid_metadata());
 
-#ifndef TORRENT_DISABLE_LOGGING
+		if(lastpiece){
 		peer_log(peer_log_alert::info, "CANCEL_ALL_REQUESTS");
-#endif
+}
 
 		while (!m_request_queue.empty())
 		{
@@ -3576,11 +3578,11 @@ namespace libtorrent
 			r.start = block_offset;
 			r.length = block_size;
 
-#ifndef TORRENT_DISABLE_LOGGING
+		if(lastpiece){
 			peer_log(peer_log_alert::outgoing_message, "CANCEL"
 				, "piece: %d s: %d l: %d b: %d"
 				, b.piece_index, block_offset, block_size, b.block_index);
-#endif
+}
 			write_cancel(r);
 		}
 	}

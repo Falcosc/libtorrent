@@ -1254,6 +1254,10 @@ namespace libtorrent
 			// and the filesystem doesn't support sparse files, only zero the priorities
 			// of the pieces that are at the tails of all files, leaving everything
 			// up to the highest written piece in each file
+			m_ses.alerts().emplace_alert<torrent_error_alert>(get_handle(), error_code(), "uploadmode true...");
+			std::stringstream ss;
+			ss << "setuploadmode true: " << j->error.ec;
+			m_ses.alerts().emplace_alert<torrent_error_alert>(get_handle(), error_code(), ss.str());
 			set_upload_mode(true);
 			return;
 		}
@@ -9974,6 +9978,10 @@ namespace libtorrent
 
 	void torrent::resume()
 	{
+		m_ses.alerts().emplace_alert<torrent_error_alert>(get_handle(), error_code(), has_picker() ? "has_picker: true" : "has_picker: false");
+		m_ses.alerts().emplace_alert<torrent_error_alert>(get_handle(), error_code(), "m_state: " + std::to_string(m_state));
+		m_ses.alerts().emplace_alert<torrent_error_alert>(get_handle(), error_code(), "upload_mode: " + std::to_string(m_upload_mode));
+
 		TORRENT_ASSERT(is_single_thread());
 		INVARIANT_CHECK;
 
@@ -11678,11 +11686,15 @@ namespace libtorrent
 		TORRENT_ASSERT(is_single_thread());
 		if (!valid_metadata())
 		{
+			m_ses.alerts().emplace_alert<torrent_error_alert>(get_handle(), error_code(), "clear because valid_metadata() false");
 			fp.clear();
 			return;
 		}
 
-		if (!need_loaded()) return;
+		if (!need_loaded()) {
+			m_ses.alerts().emplace_alert<torrent_error_alert>(get_handle(), error_code(), "clear because need_loaded() false");
+			return;
+		}
 
 		// if we're a seed, we don't have an m_file_progress anyway
 		// since we don't need one. We know we have all files
@@ -11698,6 +11710,7 @@ namespace libtorrent
 
 		if (num_have() == 0)
 		{
+			m_ses.alerts().emplace_alert<torrent_error_alert>(get_handle(), error_code(), "clear because num_have() 0");
 			// if we don't have any pieces, just return zeroes
 			fp.clear();
 			fp.resize(m_torrent_file->num_files(), 0);
@@ -11705,6 +11718,7 @@ namespace libtorrent
 		}
 
 		m_file_progress.export_progress(fp);
+		m_ses.alerts().emplace_alert<torrent_error_alert>(get_handle(), error_code(), "export_progress done");
 
 		if (flags & torrent_handle::piece_granularity)
 			return;

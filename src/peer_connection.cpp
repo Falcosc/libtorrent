@@ -3846,6 +3846,9 @@ namespace libtorrent
 		boost::shared_ptr<torrent> t = m_torrent.lock();
 		TORRENT_ASSERT(t);
 
+#ifndef TORRENT_DISABLE_LOGGING
+			peer_log(peer_log_alert::outgoing_message, "send_block_requests");
+#endif
 		if (m_disconnecting) return;
 
 		// TODO: 3 once peers are properly put in graceful pause mode, they can
@@ -3864,6 +3867,9 @@ namespace libtorrent
 
 		bool empty_download_queue = m_download_queue.empty();
 
+#ifndef TORRENT_DISABLE_LOGGING
+			peer_log(peer_log_alert::outgoing_message, "send_block_requests", "iterate queue size: %d", int(m_download_queue.size()));
+#endif
 		while (!m_request_queue.empty()
 			&& (int(m_download_queue.size()) < m_desired_queue_size
 				|| m_queued_time_critical > 0))
@@ -4738,7 +4744,10 @@ namespace libtorrent
 			disconnect(errors::torrent_aborted, op_bittorrent);
 			return;
 		}
-
+#ifndef TORRENT_DISABLE_LOGGING
+		peer_log(peer_log_alert::info, "SECOND_TICK", "m_endgame_mode: %d, m_interesting: %d, m_download_queue.empty(): %d, m_request_queue.empty(): %d, m_last_request: %d",
+			m_endgame_mode, m_interesting, m_download_queue.empty(), m_request_queue.empty(), int(duration_cast<seconds>(m_last_request-now).count()));
+#endif
 		if (m_endgame_mode
 			&& m_interesting
 			&& m_download_queue.empty()
@@ -4829,6 +4838,10 @@ namespace libtorrent
 				, int(total_seconds(d)));
 #endif
 			disconnect(errors::timed_out_inactivity, op_bittorrent);
+			// there is a rare error with not erased requests, clear request queue
+			// on timeout as fallback for all request queue managemengt errors
+			// TODO: Is queue shared over multiple connections? Or could we just clear it?
+			m_request_queue.clear();
 			return;
 		}
 

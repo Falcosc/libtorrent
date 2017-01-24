@@ -91,12 +91,11 @@ namespace libtorrent
 			- int(c.download_queue().size())
 			- int(c.request_queue().size());
 
-#ifndef TORRENT_DISABLE_LOGGING
 		c.peer_log(peer_log_alert::info, "PIECE_PICKER"
 			, "dlq: %d rqq: %d target: %d req: %d engame: %d"
 			, int(c.download_queue().size()), int(c.request_queue().size())
 			, c.desired_queue_size(), num_requests, c.endgame());
-#endif
+
 		TORRENT_ASSERT(c.desired_queue_size() > 0);
 		// if our request queue is already full, we
 		// don't have to make any new requests yet
@@ -164,23 +163,26 @@ namespace libtorrent
 			, num_requests, prefer_contiguous_blocks, c.peer_info_struct()
 			, c.picker_options(), suggested, t.num_peers()
 			, ses.stats_counters());
+		if(p.m_debug){
+			c.peer_log(peer_log_alert::info, "AFTER_PICK"
+				, "pieces: %d bits: %d interesting_pieces: %d c.picker_options(): %d",
+				int(p.num_pieces()) ,int(bits->count()), int(interesting_pieces.size()), int(c.picker_options()));
+		}
 
-#ifndef TORRENT_DISABLE_LOGGING
 		if (t.alerts().should_post<picker_log_alert>()
 			&& !interesting_pieces.empty())
 		{
 			t.alerts().emplace_alert<picker_log_alert>(t.get_handle(), c.remote()
 				, c.pid(), flags, &interesting_pieces[0], int(interesting_pieces.size()));
 		}
-#else
-		if(last_piece){
-		c.peer_log(peer_log_alert::info, "PIECE_PICKER"
-			, "prefer_contiguous: %d picked: %d"
-			, prefer_contiguous_blocks, int(interesting_pieces.size()));
+
+		if(p.m_debug){
+			c.peer_log(peer_log_alert::info, "PIECE_PICKER"
+				, "prefer_contiguous: %d picked: %d"
+				, prefer_contiguous_blocks, int(interesting_pieces.size()));
 		}
 
 		TORRENT_UNUSED(flags);
-#endif
 
 		// if the number of pieces we have + the number of pieces
 		// we're requesting from is less than the number of pieces

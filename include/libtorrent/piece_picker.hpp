@@ -831,7 +831,7 @@ namespace libtorrent
 		mutable bool m_dirty;
 
 	public:
-		mutable bool m_debug;
+		mutable bool m_debug = false;
 #ifdef TORRENT_OPTIMIZE_MEMORY_USAGE
 		enum { max_pieces = piece_pos::we_have_index - 1 };
 #else

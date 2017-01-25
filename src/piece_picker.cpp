@@ -1940,7 +1940,7 @@ if(m_debug){
 	{
 		TORRENT_ASSERT(peer == 0 || peer->in_use);
 		boost::uint32_t ret = 0;
-		if(num_have() - num_pieces() == 1) m_debug = true;
+		if(num_pieces() - num_have() == 1) m_debug = true;
 
 		// prevent the number of partial pieces to grow indefinitely
 		// make this scale by the number of peers we have. For large

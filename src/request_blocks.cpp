@@ -163,11 +163,9 @@ namespace libtorrent
 			, num_requests, prefer_contiguous_blocks, c.peer_info_struct()
 			, c.picker_options(), suggested, t.num_peers()
 			, ses.stats_counters());
-		if(p.m_debug){
-			c.peer_log(peer_log_alert::info, "AFTER_PICK"
-				, "pieces: %d bits: %d interesting_pieces: %d c.picker_options(): %d",
-				int(p.num_pieces()) ,int(bits->count()), int(interesting_pieces.size()), int(c.picker_options()));
-		}
+		c.peer_log(peer_log_alert::info, "AFTER_PICK"
+			, "pieces: %d bits: %d interesting_pieces: %d c.picker_options(): %d p.m_debug: %d",
+			int(p.num_pieces()) ,int(bits->count()), int(interesting_pieces.size()), int(c.picker_options()), p.m_debug);
 
 		if (t.alerts().should_post<picker_log_alert>()
 			&& !interesting_pieces.empty())
@@ -176,11 +174,9 @@ namespace libtorrent
 				, c.pid(), flags, &interesting_pieces[0], int(interesting_pieces.size()));
 		}
 
-		if(p.m_debug){
-			c.peer_log(peer_log_alert::info, "PIECE_PICKER"
-				, "prefer_contiguous: %d picked: %d"
-				, prefer_contiguous_blocks, int(interesting_pieces.size()));
-		}
+		c.peer_log(peer_log_alert::info, "PIECE_PICKER"
+			, "prefer_contiguous: %d picked: %d"
+			, prefer_contiguous_blocks, int(interesting_pieces.size()));
 
 		TORRENT_UNUSED(flags);
 

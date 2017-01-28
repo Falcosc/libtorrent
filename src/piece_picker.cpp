@@ -2548,9 +2548,9 @@ get_out:
 
 	bool piece_picker::is_piece_free(int piece, bitfield const& bitmask) const
 	{
-		if(m_debug && bitmask[piece]) {
+		if(m_debug) {
 			piece_pos p = m_piece_map[piece];
-			std::cerr << "have: " << p.have() << " peer_count: " << p.peer_count << " download_state: " << p.download_state << " index: " << p.index << " piece_priority: " << p.piece_priority << std::endl;
+			std::cerr << "bitmask[piece]: " << bitmask[piece] << " have: " << p.have() << " peer_count: " << p.peer_count << " download_state: " << p.download_state << " index: " << p.index << " piece_priority: " << p.piece_priority << std::endl;
 		}
 		TORRENT_ASSERT(piece >= 0 && piece < int(m_piece_map.size()));
 		return bitmask[piece]

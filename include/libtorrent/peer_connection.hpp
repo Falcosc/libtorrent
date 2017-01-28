@@ -526,7 +526,7 @@ namespace libtorrent
 		bool ignore_unchoke_slots() const;
 
 		bool failed() const { return m_failed; }
-
+		bool is_snubbed() const { return m_snubbed; }
 		int desired_queue_size() const
 		{
 			// this peer is in end-game mode we only want

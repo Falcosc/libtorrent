@@ -91,8 +91,14 @@ namespace libtorrent
 			- int(c.download_queue().size())
 			- int(c.request_queue().size());
 
+		c.peer_log(peer_log_alert::info, "PEER_CONNECTION", "before pick c.picker_options(): %d c.endgame(): %d c.no_download(): %d c.ignore_stats(): %d c.can_write(): %d c.can_read(): %d c.is_seed(): %d c.share_mode(): %d c.upload_only(): %d c.is_interesting(): %d c.is_choked(): %d c.is_peer_interested(): %d c.has_peer_choked(): %d c.get_bitfield().count(): %d c.is_disconnecting(): %d c.is_connecting(): %d c.is_outgoing(): %d c.ignore_unchoke_slots(): %d c.failed(): %d c.desired_queue_size(): %d c.disconnect_if_redundant(): %d c.has_metadata(): %d",
+			c.picker_options(), c.endgame(), c.no_download(), c.ignore_stats(), c.can_write(), c.can_read(), c.is_seed(), c.share_mode(), c.upload_only(), c.is_interesting(), c.is_choked(), c.is_peer_interested(), c.has_peer_choked(), c.get_bitfield().count(), c.is_disconnecting(), c.is_connecting(), c.is_outgoing(), c.ignore_unchoke_slots(), c.failed(), c.desired_queue_size(), c.disconnect_if_redundant(), c.has_metadata());
+		c.peer_log(peer_log_alert::info, "PEER_CONNECTION", "before pick c.can_request_time_critical(): %d c.is_corked(): %d c.outstanding_bytes(): %d c.send_buffer_size(): %d c.send_buffer_capacity(): %d c.max_out_request_queue(): %d c.num_reading_bytes(): %d c.is_snubbed() %d",
+			c.can_request_time_critical(), c.is_corked(), c.outstanding_bytes(), c.send_buffer_size(), c.send_buffer_capacity(), c.max_out_request_queue(), c.num_reading_bytes(), c.is_snubbed());
+		c.peer_log(peer_log_alert::info, "TORRENT", "before pick t.need_loaded(): %d t.is_loaded(): %d t.share_mode(): %d t.upload_mode(): %d t.is_aborted(): %d t.is_paused(): %d t.is_auto_managed(): %d t.file_priority(0): %d t.priority(): %d t.want_peers(): %d t.want_peers_download(): %d t.want_peers_finished(): %d t.num_seeds(): %d t.num_have(): %d t.num_passed(): %d t.is_seed(): %d t.is_finished(): %d t.is_inactive(): %d t.all_verified(): %d t.refcount(): %d t.is_ssl_torrent(): %d t.num_time_critical_pieces() %d", 
+			t.need_loaded(), t.is_loaded(), t.share_mode(), t.upload_mode(), t.is_aborted(), t.is_paused(), t.is_auto_managed(), t.file_priority(0), t.priority(), t.want_peers(), t.want_peers_download(), t.want_peers_finished(), t.num_seeds(), t.num_have(), t.num_passed(), t.is_seed(), t.is_finished(), t.is_inactive(), t.all_verified(), t.refcount(), t.is_ssl_torrent(), t.num_time_critical_pieces());
 		c.peer_log(peer_log_alert::info, "PIECE_PICKER"
-			, "dlq: %d rqq: %d target: %d req: %d engame: %d"
+			, "before pick dlq: %d rqq: %d target: %d req: %d engame: %d"
 			, int(c.download_queue().size()), int(c.request_queue().size())
 			, c.desired_queue_size(), num_requests, c.endgame());
 

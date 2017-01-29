@@ -4842,6 +4842,14 @@ namespace libtorrent
 			// on timeout as fallback for all request queue managemengt errors
 			// TODO: Is queue shared over multiple connections? Or could we just clear it?
 			m_request_queue.clear();
+
+			// not finished with seeder time-out means staled download
+			if (type() == url_seed_connection && 
+				t && !t->is_finished() && endgame() && is_seed()){
+				// force a torrent reset to fix state issues
+				peer_log(peer_log_alert::info, "FORCE_RECHECK", "because of staled download");
+				t->get_handle().force_recheck();
+			}
 			return;
 		}
 

@@ -4827,6 +4827,14 @@ namespace libtorrent
 				, int(total_seconds(d)));
 #endif
 			disconnect(errors::timed_out_inactivity, op_bittorrent);
+
+			// not finished with seeder time-out means staled download
+			if (type() == url_seed_connection &&
+				t && !t->is_finished() && endgame() && is_seed()){
+				// force a torrent reset to fix state issues
+				peer_log(peer_log_alert::info, "FORCE_RECHECK", "because of staled download");
+				t->get_handle().force_recheck();
+			}
 			return;
 		}
 

@@ -172,17 +172,20 @@ void test_transfer(lt::session& ses, std::vector<boost::shared_ptr<torrent_info>
 		for (int i = 0; i < int(ths.size()); ++i){
 			torrent_handle th = ths[i];
 			torrent_status s = th.status();
-			
-			print_ses_rate(i / 10.f, &s, NULL);
 
 			if (s.is_seeding)
 			{
 				fprintf(stderr, "index %d is seeding\n", i);
 				++torrent_done_count;
+			} else {
+				fprintf(stderr, "queue_position %d\n", th.queue_position());
 			}
 		}
 		if(torrent_done_count == int(ths.size())) break;
 
+		int new_top_index = i % int(ths.size());
+		fprintf(stderr, "new_top_index %d\n", new_top_index);
+		ths[new_top_index].queue_position_top();
 		test_sleep(100);
 	}
 
@@ -391,6 +394,7 @@ int EXPORT run_http_suite(int proxy, char const* protocol, bool test_url_seed
 		pack.set_int(settings_pack::urlseed_pipeline_size, 1);
 		pack.set_int(settings_pack::max_out_request_queue, 4);
 		pack.set_int(settings_pack::urlseed_max_request_bytes, 32 * 1024);
+		pack.set_int(settings_pack::active_downloads, 1);
 		libtorrent::session ses(pack, 0);
 
 		test_transfer(ses, torrent_files, proxy, port, protocol, test_url_seed

@@ -32,7 +32,7 @@ class http_handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 	def do_GET(s):
 
 		print 'INCOMING-REQUEST: ', s.requestline
-		print >>sys.stderr, s.headers
+		print s.headers
 
 		global chunked_encoding
 		global keepalive

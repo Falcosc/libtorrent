@@ -88,7 +88,7 @@ web_peer_connection::web_peer_connection(peer_connection_args const& pack
 
 	// if the web server is known not to support keep-alive. request 4MiB
 	// but we want to have at least piece size to prevent block based requests
-	int const min_size = std::max((web.supports_keepalive ? 1 : 4) * 1024 * 1024,
+	int const min_size = std::max((web.supports_keepalive ? 1 : 4) * 16 * 1024,
 		tor->torrent_file().piece_length());
 
 	// we prefer downloading large chunks from web seeds,

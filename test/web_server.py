@@ -32,7 +32,7 @@ class http_handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 	def do_GET(s):
 
 		print 'INCOMING-REQUEST: ', s.requestline
-		print s.headers
+		print >>sys.stderr, s.headers
 
 		global chunked_encoding
 		global keepalive
@@ -125,6 +125,7 @@ class http_handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 				start_range = 0
 				end_range = size
 				if 'Range' in s.headers:
+					print >>sys.stderr, s.headers
 					s.send_response(206)
 					st, e = s.headers['range'][6:].split('-', 1)
 					sl = len(st)

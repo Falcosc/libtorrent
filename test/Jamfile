@@ -234,4 +234,6 @@ alias osx-tests :
 ;
 
 explicit win-tests ;
-
+alias fas :
+	test_web_seed
+;

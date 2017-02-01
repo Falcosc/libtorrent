@@ -183,10 +183,14 @@ void test_transfer(lt::session& ses, std::vector<boost::shared_ptr<torrent_info>
 		}
 		if(torrent_done_count == int(ths.size())) break;
 
+		int next_top_index = (i + 1) % int(ths.size());
 		int new_top_index = i % int(ths.size());
 		fprintf(stderr, "new_top_index %d\n", new_top_index);
+		ths[next_top_index].pause();
 		ths[new_top_index].queue_position_top();
-		test_sleep(100);
+		ths[new_top_index].resume();
+		//because of inactivity timer it does not make sence to update queue more often
+		test_sleep(5000);
 	}
 
 	TEST_EQUAL(torrent_done_count, int(ths.size()));
@@ -363,10 +367,10 @@ int EXPORT run_http_suite(int proxy, char const* protocol, bool test_url_seed
 		char url[512];
 		char file[512];
 		std::vector<boost::shared_ptr<torrent_info>> torrent_files;
-		for (int i = 0; i < 3; ++i)
+		for (int i = 0; i < 19; ++i)
 		{
 			snprintf(url, sizeof(url), ("%s://127.0.0.1:%d/" + save_path + "/test-single-file%d").c_str(), protocol, port, i);
-			snprintf(file, sizeof(file), "3990920,name=test-single-file%d", i);
+			snprintf(file, sizeof(file), "10990920,name=test-single-file%d", i);
 			torrent_args args1 = torrent_args()
 				.file(file)
 				.name("torrent_dir")
@@ -386,15 +390,16 @@ int EXPORT run_http_suite(int proxy, char const* protocol, bool test_url_seed
 		pack.set_str(settings_pack::listen_interfaces, "0.0.0.0:51000");
 		pack.set_int(settings_pack::max_retry_port_bind, 1000);
 		pack.set_int(settings_pack::alert_mask, mask);
+		pack.set_int(settings_pack::urlseed_pipeline_size, 1);
+		pack.set_int(settings_pack::max_out_request_queue, 4);
+		pack.set_int(settings_pack::urlseed_max_request_bytes, 32 * 1024);
+		pack.set_int(settings_pack::active_downloads, 2);
+		pack.set_int(settings_pack::auto_manage_interval, 5);
 		pack.set_bool(settings_pack::enable_lsd, false);
 		pack.set_bool(settings_pack::enable_natpmp, false);
 		pack.set_bool(settings_pack::enable_upnp, false);
 		pack.set_bool(settings_pack::enable_dht, false);
 
-		pack.set_int(settings_pack::urlseed_pipeline_size, 1);
-		pack.set_int(settings_pack::max_out_request_queue, 4);
-		pack.set_int(settings_pack::urlseed_max_request_bytes, 32 * 1024);
-		pack.set_int(settings_pack::active_downloads, 1);
 		libtorrent::session ses(pack, 0);
 
 		test_transfer(ses, torrent_files, proxy, port, protocol, test_url_seed

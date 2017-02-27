@@ -2495,7 +2495,7 @@ namespace libtorrent
 		t->state_updated();
 
 #if TORRENT_USE_INVARIANT_CHECKS
-		check_invariant();
+		//check_invariant();
 #endif
 	}
 
@@ -2645,7 +2645,7 @@ namespace libtorrent
 	void peer_connection::incoming_piece(peer_request const& p, disk_buffer_holder& data)
 	{
 		TORRENT_ASSERT(is_single_thread());
-		INVARIANT_CHECK;
+		//INVARIANT_CHECK;
 
 		boost::shared_ptr<torrent> t = m_torrent.lock();
 		TORRENT_ASSERT(t);
@@ -2694,7 +2694,7 @@ namespace libtorrent
 #if TORRENT_USE_INVARIANT_CHECKS
 		check_postcondition post_checker_(t);
 #if defined TORRENT_EXPENSIVE_INVARIANT_CHECKS
-		t->check_invariant();
+		//t->check_invariant();
 #endif
 #endif
 
@@ -2773,7 +2773,7 @@ namespace libtorrent
 			// download queue, which is why we need to add the bytes back.
 			m_outstanding_bytes += p.length;
 #if TORRENT_USE_INVARIANT_CHECKS
-			check_invariant();
+			//check_invariant();
 #endif
 			return;
 		}
@@ -2932,7 +2932,7 @@ namespace libtorrent
 
 #if TORRENT_USE_INVARIANT_CHECKS \
 	&& defined TORRENT_EXPENSIVE_INVARIANT_CHECKS
-		t->check_invariant();
+		//t->check_invariant();
 #endif
 
 #if TORRENT_USE_ASSERTS
@@ -3011,7 +3011,7 @@ namespace libtorrent
 		// this burst of disk events
 //		m_ses.cork_burst(this);
 
-		INVARIANT_CHECK;
+		//INVARIANT_CHECK;
 
 		if (!t)
 		{
@@ -3423,7 +3423,7 @@ namespace libtorrent
 	bool peer_connection::add_request(piece_block const& block, int flags)
 	{
 		TORRENT_ASSERT(is_single_thread());
-		INVARIANT_CHECK;
+		//INVARIANT_CHECK;
 
 		boost::shared_ptr<torrent> t = m_torrent.lock();
 		TORRENT_ASSERT(t);
@@ -3840,7 +3840,7 @@ namespace libtorrent
 	void peer_connection::send_block_requests()
 	{
 		TORRENT_ASSERT(is_single_thread());
-		INVARIANT_CHECK;
+		//INVARIANT_CHECK;
 
 		boost::shared_ptr<torrent> t = m_torrent.lock();
 		TORRENT_ASSERT(t);
@@ -3905,7 +3905,7 @@ namespace libtorrent
 			m_download_queue.push_back(block);
 			m_outstanding_bytes += block_size;
 #if TORRENT_USE_INVARIANT_CHECKS
-			check_invariant();
+			//check_invariant();
 #endif
 
 			// if we are requesting large blocks, merge the smaller
@@ -3948,7 +3948,7 @@ namespace libtorrent
 					r.length += block_size;
 					m_outstanding_bytes += block_size;
 #if TORRENT_USE_INVARIANT_CHECKS
-					check_invariant();
+					//check_invariant();
 #endif
 				}
 			}
@@ -5266,7 +5266,7 @@ namespace libtorrent
 	void peer_connection::on_seed_mode_hashed(disk_io_job const* j)
 	{
 		TORRENT_ASSERT(is_single_thread());
-		INVARIANT_CHECK;
+		//INVARIANT_CHECK;
 
 		boost::shared_ptr<torrent> t = m_torrent.lock();
 		torrent_ref_holder h(t.get(), "async_seed_hash");
@@ -5474,7 +5474,7 @@ namespace libtorrent
 	int peer_connection::request_bandwidth(int channel, int bytes)
 	{
 		TORRENT_ASSERT(is_single_thread());
-		INVARIANT_CHECK;
+		//INVARIANT_CHECK;
 		// we can only have one outstanding bandwidth request at a time
 		if (m_channel_state[channel] & peer_info::bw_limit) return 0;
 
@@ -5722,7 +5722,7 @@ namespace libtorrent
 	void peer_connection::setup_receive()
 	{
 		TORRENT_ASSERT(is_single_thread());
-		INVARIANT_CHECK;
+		//INVARIANT_CHECK;
 
 		if (m_disconnecting) return;
 
@@ -6279,7 +6279,7 @@ namespace libtorrent
 	bool peer_connection::can_read()
 	{
 		TORRENT_ASSERT(is_single_thread());
-		INVARIANT_CHECK;
+		//INVARIANT_CHECK;
 
 		boost::shared_ptr<torrent> t = m_torrent.lock();
 

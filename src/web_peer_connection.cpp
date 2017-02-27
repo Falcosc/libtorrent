@@ -681,7 +681,7 @@ void web_peer_connection::on_receive(error_code const& error
 				return;
 			}
 
-			TORRENT_ASSERT(recv_buffer.left() == 0 || *recv_buffer.begin == 'H');
+			//TORRENT_ASSERT(recv_buffer.left() == 0 || *recv_buffer.begin == 'H');
 			TORRENT_ASSERT(recv_buffer.left() <= m_recv_buffer.packet_size());
 
 			// this means the entire status line hasn't been received yet

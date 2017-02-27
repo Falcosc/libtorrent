@@ -7147,7 +7147,7 @@ retry:
 		TORRENT_ASSERT(is_single_thread());
 
 		int loaded_limit = m_settings.get_int(settings_pack::active_loaded_limit);
-		TORRENT_ASSERT(m_num_save_resume <= loaded_limit);
+//		TORRENT_ASSERT(m_num_save_resume <= loaded_limit);
 //		if (m_num_save_resume < loaded_limit)
 //			TORRENT_ASSERT(m_save_resume_queue.empty());
 

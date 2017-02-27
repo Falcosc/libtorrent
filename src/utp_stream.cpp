@@ -1623,7 +1623,7 @@ void utp_socket_impl::parse_sack(boost::uint16_t packet_ack, boost::uint8_t cons
 // pointed to by ptr
 void utp_socket_impl::write_payload(boost::uint8_t* ptr, int size)
 {
-	INVARIANT_CHECK;
+	//INVARIANT_CHECK;
 
 #ifdef TORRENT_DEBUG
 	int write_buffer_size = 0;
@@ -1676,7 +1676,7 @@ void utp_socket_impl::write_payload(boost::uint8_t* ptr, int size)
 
 void utp_socket_impl::subscribe_drained()
 {
-	INVARIANT_CHECK;
+	//INVARIANT_CHECK;
 
 	if (m_subscribe_drained) return;
 
@@ -1757,7 +1757,7 @@ private:
 bool utp_socket_impl::send_pkt(int const flags)
 {
 #ifdef TORRENT_EXPENSIVE_INVARIANT_CHECKS
-	INVARIANT_CHECK;
+	//INVARIANT_CHECK;
 #endif
 
 	bool const force = (flags & pkt_ack) || (flags & pkt_fin);
@@ -2533,7 +2533,7 @@ bool utp_socket_impl::consume_incoming_data(
 	utp_header const* ph, boost::uint8_t const* ptr, int payload_size
 	, time_point now)
 {
-	INVARIANT_CHECK;
+	//INVARIANT_CHECK;
 
 	if (ph->get_type() != ST_DATA) return false;
 
@@ -2710,7 +2710,7 @@ void utp_socket_impl::init_mtu(int link_mtu, int utp_mtu)
 bool utp_socket_impl::incoming_packet(boost::uint8_t const* buf, int size
 	, udp::endpoint const& ep, time_point receive_time)
 {
-	INVARIANT_CHECK;
+	//INVARIANT_CHECK;
 
 	utp_header const* ph = reinterpret_cast<utp_header const*>(buf);
 
@@ -3410,7 +3410,7 @@ bool utp_socket_impl::incoming_packet(boost::uint8_t const* buf, int size
 void utp_socket_impl::do_ledbat(const int acked_bytes, const int delay
 	, const int in_flight)
 {
-	INVARIANT_CHECK;
+	//INVARIANT_CHECK;
 
 	// the portion of the in-flight bytes that were acked. This is used to make
 	// the gain factor be scaled by the rtt. The formula is applied once per

@@ -9024,7 +9024,7 @@ namespace libtorrent
 
 		TORRENT_ASSERT(want_peers_download() == m_links[aux::session_interface::torrent_want_peers_download].in_list());
 		TORRENT_ASSERT(want_peers_finished() == m_links[aux::session_interface::torrent_want_peers_finished].in_list());
-		//TORRENT_ASSERT(want_tick() == m_links[aux::session_interface::torrent_want_tick].in_list());
+		TORRENT_ASSERT(want_tick() == m_links[aux::session_interface::torrent_want_tick].in_list());
 		TORRENT_ASSERT((!m_allow_peers && m_auto_managed && !m_abort) == m_links[aux::session_interface::torrent_want_scrape].in_list());
 
 		bool is_checking = false;

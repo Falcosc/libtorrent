@@ -3536,7 +3536,7 @@ void utp_stream::cancel_handlers(error_code const& ec)
 // into account
 int utp_socket_impl::packet_timeout() const
 {
-	INVARIANT_CHECK;
+	//INVARIANT_CHECK;
 
 	// SYN packets have a bit longer timeout, since we don't
 	// have an RTT estimate yet, make a conservative guess

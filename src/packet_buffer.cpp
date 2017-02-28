@@ -135,7 +135,7 @@ namespace libtorrent {
 
 	void* packet_buffer_impl::at(index_type idx) const
 	{
-		INVARIANT_CHECK;
+		//INVARIANT_CHECK;
 		if (idx >= m_first + m_capacity)
 			return 0;
 

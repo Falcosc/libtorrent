@@ -6148,7 +6148,7 @@ namespace libtorrent
 		// flush the send buffer at the end of this function
 		cork _c(*this);
 
-		INVARIANT_CHECK;
+		//INVARIANT_CHECK;
 
 		int bytes_in_loop = bytes_transferred;
 
